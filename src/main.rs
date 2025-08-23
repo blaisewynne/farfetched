@@ -6,13 +6,13 @@ fn main() {
     let bashv = get_bash();
     print!("{}", os);
     print!("{}", user);
-    print!("{}", strg);
+    print!("{} / {} ({})\n", strg[3], strg[1], strg[4]);
     print!("{}", bashv);
 }
 
 
 fn get_os() -> String {
-    let os_command = Command::new("uname").arg("-n").output().expect("Failed to get OS.");
+    let os_command = Command::new("uname").output().expect("Failed to get OS.");
     let os = String::from_utf8_lossy(&os_command.stdout);
     os.to_string()
 }
@@ -23,22 +23,25 @@ fn get_user() -> String {
     usr.to_string()
 }
 
-fn get_storage() -> String{
+fn get_storage() -> Vec<String> {
  let ps_child = Command::new("df")
-        .arg("-l")
+        .arg("-h")
         .stdout(Stdio::piped())
         .spawn()                    
         .unwrap();                    
     let grep_child_one = Command::new("grep")
         .arg("-oP")
-        .arg("Used")
+        .arg("/dev/nvme0n1p2[^ ]* (.*)")
         .stdin(Stdio::from(ps_child.stdout.unwrap()))
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
     let output = grep_child_one.wait_with_output().unwrap();
     let strg = String::from_utf8_lossy(&output.stdout);
-    strg.to_string()
+    let strg = strg.to_string();
+    let strg_array: Vec<String> = strg.split_whitespace().map(str::to_string).collect();
+    strg_array
+
 }
 
 fn get_bash() -> String {
@@ -63,3 +66,5 @@ fn get_bash() -> String {
    let bashv = String::from_utf8_lossy(&output.stdout);
    bashv.to_string()
 }
+
+
