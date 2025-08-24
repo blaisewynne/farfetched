@@ -6,16 +6,19 @@ fn main() {
     let bashv = get_bash();
     let cpu = get_cpu();
     let kernel = get_kernel();
+    let mem = get_ram();
+    let memp = get_ram_percentage();
     print!("{}", os);
     print!("{}", user);
     print!("{} / {} (\x1b[32m{}\x1b[0m)\n", strg[3], strg[1], strg[4]);
     print!("{}", kernel);
     print!("{}", bashv);
     print!("{}", cpu);
+    print!("{} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], memp);
 }
 
 fn get_os() -> String {
-
+    
     let char = '"';
     let char_string = char.to_string();
     let os_cat_command = Command::new("cat")
@@ -125,9 +128,53 @@ fn get_cpu() -> String {
 }
 
 fn get_kernel() -> String {
-   let output = Command::new("uname").arg("-r").
-       output()
+   let output = Command::new("uname").arg("-r")
+       .output()
        .expect("Kernel version not found.");
    let kernel = String::from_utf8_lossy(&output.stdout);
    kernel.to_string()
+}
+
+fn get_ram() -> Vec<String> {
+   let mem_free_command = Command::new("free")
+       .arg("-h")
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+    let mem_grep_command = Command::new("grep")
+       .arg("-oP")
+       .arg(r"Mem:[^ ]* (.*)")
+       .stdin(Stdio::from(mem_free_command.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+    let output = mem_grep_command.wait_with_output().unwrap();
+    let mem = String::from_utf8_lossy(&output.stdout);
+    let mem = mem.to_string();
+    let mem_array: Vec<String> = mem.split_whitespace().map(str::to_string).collect();
+    mem_array
+}
+
+fn get_ram_percentage() -> i64 {
+   let memp_free_command = Command::new("free")
+       .arg("-g")
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let memp_grep_command = Command::new("grep")
+       .arg("-oP")
+       .arg(r"Mem:[^ ]* (.*)")
+       .stdin(Stdio::from(memp_free_command.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let output = memp_grep_command.wait_with_output().unwrap();
+   let memp = String::from_utf8_lossy(&output.stdout);
+   let memp = memp.to_string();
+   let memp_array: Vec<String> = memp.split_whitespace().map(str::to_string).collect();
+   let memp_total: f64 = memp_array[1].parse().unwrap();
+   let memp_used: f64 = memp_array[2].parse().unwrap();
+   let ram_percentage: f64 = memp_used / memp_total * 100.0;
+   let ram_percentage: i64 = ram_percentage as i64;
+   ram_percentage
 }
