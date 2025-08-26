@@ -10,6 +10,7 @@ pub fn main() {
     let mem = get_ram();
     let memp = get_ram_percentage();
     let battery = get_battery_percentage();
+    let (sysfamily, vendor) = get_system();
     print!("{}", os);
     print!("{}", user);
     print!("{} / {} (\x1b[32m{}\x1b[0m)\n", strg[3], strg[1], strg[4]);
@@ -17,6 +18,7 @@ pub fn main() {
     print!("{}", bashv);
     print!("{}", cpu);
     print!("{} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], memp);
+    print!("{} {}", vendor, sysfamily);
     modify_battery();
 }
 
@@ -235,5 +237,19 @@ fn modify_battery() {
    } else {
       print!("{}, (\x1b[33m{}%\x1b[0m)\n", batterystatus, battery);
    }
+}
 
+fn get_system() -> (String, String) {
+   let system_family_command = Command::new("cat")
+       .arg("/sys/devices/virtual/dmi/id/product_family")
+       .output()
+       .expect("");
+    let family_output = String::from_utf8_lossy(&system_family_command.stdout);
+    let system_vendor_command = Command::new("cat")
+        .arg("/sys/devices/virtual/dmi/id/sys_vendor")
+        .output()
+        .expect("");
+    let vendor_output = String::from_utf8_lossy(&system_vendor_command.stdout);
+    let vendor = vendor_output.trim_end();
+    (family_output.to_string(), vendor.to_string())
 }
