@@ -5,15 +5,15 @@ mod mac;
 fn main() {
     let cos = get_cos();
     match cos.as_str() {
-        "Linux" => linux::main(),
-        "Darwin" => mac::main(),
-        &_ => println!("error"),
+        "Linux\n" => linux::main(),
+        "Darwin\n" => mac::main(),
+        _ => println!("Can't find OS."),
     }
 }
 fn get_cos() -> String {
    let output = Command::new("uname")
        .output()
-       .expect("");
+       .expect("failed to get os");
    let cos = String::from_utf8_lossy(&output.stdout);
    cos.to_string()
 }
