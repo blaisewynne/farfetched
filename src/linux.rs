@@ -11,6 +11,7 @@ pub fn main() {
     let memp = get_ram_percentage();
     let battery = get_battery_percentage();
     let (sysfamily, vendor) = get_system();
+    let terminal = get_termtest();
     print!("{}", os);
     print!("{}", user);
     print!("{} / {} (\x1b[32m{}\x1b[0m)\n", strg[3], strg[1], strg[4]);
@@ -18,8 +19,11 @@ pub fn main() {
     print!("{}", bashv);
     print!("{}", cpu);
     print!("{} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], memp);
-    print!("{} {}", vendor, sysfamily);
     modify_battery();
+    print!("{} {}", vendor, sysfamily);
+    print!("{}", terminal);
+    print!("\n\x1b[0;30m████\x1b[0;31m████\x1b[0;32m████\x1b[0;33m████\x1b[0;34m████\x1b[0;35m████\x1b[0;36m████\x1b[0;37m████\n");
+    print!("\x1b[0;30m▀▀▀▀\x1b[0;31m▀▀▀▀\x1b[0;32m▀▀▀▀\x1b[0;33m▀▀▀▀\x1b[0;34m▀▀▀▀\x1b[0;35m▀▀▀▀\x1b[0;36m▀▀▀▀\x1b[0;37m▀▀▀▀\n");
 }
 
 fn get_os() -> String {
@@ -80,8 +84,37 @@ fn get_storage() -> Vec<String> {
     let strg = strg.to_string();
     let strg_array: Vec<String> = strg.split_whitespace().map(str::to_string).collect();
     strg_array
-
 }
+
+fn get_termtest() -> String {
+    let term_command = Command::new("sh")
+        .arg("-c")
+        .arg("$SHELL")
+        .output()
+        .expect("");
+    let terminal = String::from_utf8_lossy(&term_command.stdout);
+    terminal.to_string()
+}
+
+fn get_term() -> String {
+   let term_read_command = Command::new("echo")
+       .arg("$SHELL")
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+    let term_grep_command = Command::new("grep")
+       .arg("-oP")
+       .arg(r"bin/\K.*")
+       .stdin(Stdio::from(term_read_command.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+    let output = term_grep_command.wait_with_output().unwrap();
+    let term = String::from_utf8_lossy(&output.stdout);
+    let terminal = term.to_string();
+    terminal
+}
+
 
 fn get_bash() -> String {
    let bashver_command = Command::new("bash")
