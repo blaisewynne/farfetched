@@ -11,23 +11,24 @@ pub fn main() {
     let memp = get_ram_percentage();
     let battery = get_battery_percentage();
     let (sysfamily, vendor) = get_system();
-    let terminal = get_termtest();
+    let terminal = get_termtesttest();
+    let uptime = get_uptime();
     print!("{}", os);
     print!("{}", user);
     print!("{} / {} (\x1b[32m{}\x1b[0m)\n", strg[3], strg[1], strg[4]);
     print!("{}", kernel);
-    print!("{}", bashv);
+    print!("bash {}", bashv);
     print!("{}", cpu);
     print!("{} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], memp);
     modify_battery();
-    print!("{} {}", vendor, sysfamily);
     print!("{}", terminal);
+    print!("{} {}", vendor, sysfamily);
+    print!("{}", uptime);
     print!("\n\x1b[0;30m████\x1b[0;31m████\x1b[0;32m████\x1b[0;33m████\x1b[0;34m████\x1b[0;35m████\x1b[0;36m████\x1b[0;37m████\n");
     print!("\x1b[0;30m▀▀▀▀\x1b[0;31m▀▀▀▀\x1b[0;32m▀▀▀▀\x1b[0;33m▀▀▀▀\x1b[0;34m▀▀▀▀\x1b[0;35m▀▀▀▀\x1b[0;36m▀▀▀▀\x1b[0;37m▀▀▀▀\n");
 }
 
-fn get_os() -> String {
-    
+fn get_os() -> String { 
     let os_cat_command = Command::new("cat")
         .arg("/etc/os-release")
         .stdout(Stdio::piped())
@@ -40,8 +41,7 @@ fn get_os() -> String {
         .spawn()
         .unwrap();
     let os_cut_command = Command::new("cut")
-        .arg("-d=")
-        .arg("-f2-")
+        .args(["-d=", "-f2-"])
         .stdin(Stdio::from(os_grep_command.stdout.unwrap()))
         .stdout(Stdio::piped())
         .spawn()
@@ -73,8 +73,7 @@ fn get_storage() -> Vec<String> {
         .spawn()                    
         .unwrap();                    
     let grep_child_one = Command::new("grep")
-        .arg("-oP")
-        .arg("/dev/nvme0n1p2[^ ]* (.*)")
+        .args(["-oP", "/dev/nvme0n1p2[^ ]* (.*)"])
         .stdin(Stdio::from(ps_child.stdout.unwrap()))
         .stdout(Stdio::piped())
         .spawn()
@@ -86,14 +85,51 @@ fn get_storage() -> Vec<String> {
     strg_array
 }
 
-fn get_termtest() -> String {
+
+fn get_termtesttest() -> String {
     let term_command = Command::new("sh")
-        .arg("-c")
-        .arg("$SHELL")
-        .output()
-        .expect("");
-    let terminal = String::from_utf8_lossy(&term_command.stdout);
+        .args(["-c", "echo", "$SHELL"])
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let term_grep_command = Command::new("grep")
+        .args(["-oP", r#""bin/\K.*""#])
+        .stdin(Stdio::from(term_command.stdout.unwrap()))
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let output = term_grep_command.wait_with_output().unwrap();
+    let terminal = String::from_utf8_lossy(&output.stdout);
     terminal.to_string()
+}
+
+fn get_termtest() -> String {
+    let term_command = Command::new("asj")
+        .arg("$0")
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let term_grep_command = Command::new("grep")
+        .args(["-oP", r"bin/\K.*"])
+        .stdin(Stdio::from(term_command.stdout.unwrap()))
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let output = term_grep_command.wait_with_output().unwrap();
+    let terminal = String::from_utf8_lossy(&output.stdout);
+    let terminal = terminal.trim_end();
+    terminal.to_string()
+}
+
+fn get_terminal_version() -> String {
+   let terminal_output = get_termtest();
+   let term_command = Command::new(terminal_output)
+       .arg("--version")
+       .output()
+       .expect("");
+   let output = String::from_utf8_lossy(&term_command.stdout);
+   let terminalv = output.trim_end();
+   terminalv.to_string()
 }
 
 fn get_term() -> String {
@@ -103,8 +139,7 @@ fn get_term() -> String {
        .spawn()
        .unwrap();
     let term_grep_command = Command::new("grep")
-       .arg("-oP")
-       .arg(r"bin/\K.*")
+       .arg(".*")
        .stdin(Stdio::from(term_read_command.stdout.unwrap()))
        .stdout(Stdio::piped())
        .spawn()
@@ -123,7 +158,7 @@ fn get_bash() -> String {
         .spawn()
         .unwrap();
    let bashver_grep = Command::new("grep")
-        .arg("version")
+        .args(["-oP", "version[^(]*"])
         .stdin(Stdio::from(bashver_command.stdout.unwrap()))
         .stdout(Stdio::piped())
         .spawn()
@@ -145,15 +180,13 @@ fn get_cpu() -> String {
        .spawn()
        .unwrap();
    let cpumod_grep = Command::new("grep")
-       .arg("-oP")
-       .arg(r"Model name:\K.*")
+       .args(["-oP", r"Model name:\K.*"])
        .stdin(Stdio::from(cpumod_command.stdout.unwrap()))
        .stdout(Stdio::piped())
        .spawn()
        .unwrap();
    let cpumod_sed = Command::new("sed")
-       .arg("-e")
-       .arg(r"s/^[[:space:]]*//g")
+       .args(["-e", r"s/^[[:space:]]*//g"])
        .stdin(Stdio::from(cpumod_grep.stdout.unwrap()))
        .stdout(Stdio::piped())
        .spawn()
@@ -164,7 +197,8 @@ fn get_cpu() -> String {
 }
 
 fn get_kernel() -> String {
-   let output = Command::new("uname").arg("-r")
+   let output = Command::new("bash")
+       .args(["-c", "readlink", "-f", "/proc/$$/exe"])
        .output()
        .expect("Kernel version not found.");
    let kernel = String::from_utf8_lossy(&output.stdout);
@@ -178,8 +212,7 @@ fn get_ram() -> Vec<String> {
        .spawn()
        .unwrap();
     let mem_grep_command = Command::new("grep")
-       .arg("-oP")
-       .arg(r"Mem:[^ ]* (.*)")
+       .args(["-oP", r"Mem:[^ ]* (.*)"])
        .stdin(Stdio::from(mem_free_command.stdout.unwrap()))
        .stdout(Stdio::piped())
        .spawn()
@@ -198,8 +231,7 @@ fn get_ram_percentage() -> i64 {
        .spawn()
        .unwrap();
    let memp_grep_command = Command::new("grep")
-       .arg("-oP")
-       .arg(r"Mem:[^ ]* (.*)")
+       .args(["-oP", r"Mem:[^ ]* (.*)"])
        .stdin(Stdio::from(memp_free_command.stdout.unwrap()))
        .stdout(Stdio::piped())
        .spawn()
@@ -241,8 +273,7 @@ fn get_battery_status() -> String {
         .spawn()
         .unwrap();
     let battery_cut_command = Command::new("cut")
-        .arg("-d=")
-        .arg("-f2-")
+        .args(["-d=", "-f2-"])
         .stdin(Stdio::from(battery_grep_command.stdout.unwrap()))
         .stdout(Stdio::piped())
         .spawn()
@@ -285,4 +316,21 @@ fn get_system() -> (String, String) {
     let vendor_output = String::from_utf8_lossy(&system_vendor_command.stdout);
     let vendor = vendor_output.trim_end();
     (family_output.to_string(), vendor.to_string())
+}
+
+fn get_uptime() -> String {
+   let uptime_command = Command::new("uptime")
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+    let uptime_grep_command = Command::new("grep")
+        .args(["-oP", r#"'up\K.[^,]*"#])
+        .stdin(Stdio::from(uptime_command.stdout.unwrap()))
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let output = uptime_grep_command.wait_with_output().unwrap();
+    let uptimes = String::from_utf8_lossy(&output.stdout);
+    let uptime = uptimes.trim_end();
+    uptime.to_string()
 }
