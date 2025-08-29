@@ -259,7 +259,7 @@ fn get_battery_percentage() -> i64 {
    battery
 }
 
-fn get_battery_status() -> String {
+fn get_battery_status() -> () {
     
     let battery_cat_command = Command::new("cat")
         .arg("/sys/class/power_supply/BAT0/uevent")
@@ -288,18 +288,23 @@ fn get_battery_status() -> String {
     let output = battery_tr_command.wait_with_output().unwrap();
     let bstatus = String::from_utf8_lossy(&output.stdout);
     let bstatus = bstatus.trim_end();
-    bstatus.to_string()
+    let bstatus = bstatus.to_string();
+    match bstatus.as_str() {
+        "Charging" => print!("\x1b[32mAC \x1b[0mConnected "),
+        "Discharging" => print!("\x1b[31mAC \x1b[0mDisconnected "),
+        _ => print!("\x1b[33mUnknown\x1b[0mPower Connection "),
+    }
 }
 
 fn modify_battery() {
    let battery = get_battery_percentage();
-   let batterystatus = get_battery_status();
+   let battery_status = get_battery_status();
    if battery >= 50 {
-      print!("{}, (\x1b[32m{}%\x1b[0m)\n", batterystatus, battery);
+      print!("(\x1b[32m{}%\x1b[0m)\n", battery);
    } else if battery <= 40 {
-      print!("{}, (\x1b[31m{}%\x1b[0m)\n", batterystatus, battery);
+      print!("(\x1b[31m{}%\x1b[0m)\n", battery);
    } else {
-      print!("{}, (\x1b[33m{}%\x1b[0m)\n", batterystatus, battery);
+      print!("(\x1b[33m{}%\x1b[0m)\n", battery);
    }
 }
 
