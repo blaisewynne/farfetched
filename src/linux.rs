@@ -1,34 +1,21 @@
 use std::process::{Command, Stdio};
 #[allow(unused)]
 pub fn main() {
-    let os = get_os();
-    let user = get_user();
-    let strg = get_storage();
-    let bashv = get_bash();
-    let cpu = get_cpu();
-    let kernel = get_kernel();
-    let mem = get_ram();
-    let memp = get_ram_percentage();
-    let battery = get_battery_percentage();
-    let (sysfamily, vendor) = get_system();
-    let terminal = get_termtesttest();
-    let uptime = get_uptime();
-    print!("> {}", os);
-    print!("> {}", user);
-    print!("> {} / {} (\x1b[32m{}\x1b[0m)\n", strg[3], strg[1], strg[4]);
-    print!("{}", kernel);
-    print!("> bash {}", bashv);
-    print!("> {}", cpu);
-    print!("> {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], memp);
-    modify_battery();
-    print!("{}", terminal);
-    print!("{} {}", vendor, sysfamily);
-    print!("{}", uptime);
-    print!("\n\x1b[0;30m████\x1b[0;31m████\x1b[0;32m████\x1b[0;33m████\x1b[0;34m████\x1b[0;35m████\x1b[0;36m████\x1b[0;37m████\n");
-    print!("\x1b[0;30m▀▀▀▀\x1b[0;31m▀▀▀▀\x1b[0;32m▀▀▀▀\x1b[0;33m▀▀▀▀\x1b[0;34m▀▀▀▀\x1b[0;35m▀▀▀▀\x1b[0;36m▀▀▀▀\x1b[0;37m▀▀▀▀\n");
+    println!("\x1b[34m| OS |\x1b[37m");
+    get_os();
+    get_user();
+    get_bash();
+    get_ram_percentage();
+    println!("\x1b[32m| SYSTEM |\x1b[37m");
+    get_storage();
+    get_cpu();
+    get_gpu();
+    get_battery();
+    get_system();
+    get_colours();
 }
 
-fn get_os() -> String { 
+fn get_os() { 
     let os_cat_command = Command::new("cat")
         .arg("/etc/os-release")
         .stdout(Stdio::piped())
@@ -55,18 +42,20 @@ fn get_os() -> String {
         .unwrap();
     let output = os_tr_command.wait_with_output().unwrap();
     let os = String::from_utf8_lossy(&output.stdout);
-    os.to_string()
+    let os = os.to_string();
+    print!("<-> {}", os);
 }
 
-fn get_user() -> String {
+fn get_user() {
     let usr_command =  Command::new("whoami")
         .output()
         .expect("Failed to get user.");
     let usr = String::from_utf8_lossy(&usr_command.stdout);
-    usr.to_string()
+    let usr = usr.to_string();
+    print!("<-> {}", usr);
 }
 
-fn get_storage() -> Vec<String> {
+fn get_storage() {
     let ps_child = Command::new("df")
         .arg("-h")
         .stdout(Stdio::piped())
@@ -82,76 +71,10 @@ fn get_storage() -> Vec<String> {
     let strg = String::from_utf8_lossy(&output.stdout);
     let strg = strg.to_string();
     let strg_array: Vec<String> = strg.split_whitespace().map(str::to_string).collect();
-    strg_array
+    print!("<-> {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[3], strg_array[1], strg_array[4]);
 }
 
-
-fn get_termtesttest() -> String {
-    let term_command = Command::new("sh")
-        .args(["-c", "echo", "$SHELL"])
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();
-    let term_grep_command = Command::new("grep")
-        .args(["-oP", r#""bin/\K.*""#])
-        .stdin(Stdio::from(term_command.stdout.unwrap()))
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();
-    let output = term_grep_command.wait_with_output().unwrap();
-    let terminal = String::from_utf8_lossy(&output.stdout);
-    terminal.to_string()
-}
-
-fn get_termtest() -> String {
-    let term_command = Command::new("asj")
-        .arg("$0")
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();
-    let term_grep_command = Command::new("grep")
-        .args(["-oP", r"bin/\K.*"])
-        .stdin(Stdio::from(term_command.stdout.unwrap()))
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();
-    let output = term_grep_command.wait_with_output().unwrap();
-    let terminal = String::from_utf8_lossy(&output.stdout);
-    let terminal = terminal.trim_end();
-    terminal.to_string()
-}
-
-fn get_terminal_version() -> String {
-   let terminal_output = get_termtest();
-   let term_command = Command::new(terminal_output)
-       .arg("--version")
-       .output()
-       .expect("");
-   let output = String::from_utf8_lossy(&term_command.stdout);
-   let terminalv = output.trim_end();
-   terminalv.to_string()
-}
-
-fn get_term() -> String {
-   let term_read_command = Command::new("echo")
-       .arg("$SHELL")
-       .stdout(Stdio::piped())
-       .spawn()
-       .unwrap();
-    let term_grep_command = Command::new("grep")
-       .arg(".*")
-       .stdin(Stdio::from(term_read_command.stdout.unwrap()))
-       .stdout(Stdio::piped())
-       .spawn()
-       .unwrap();
-    let output = term_grep_command.wait_with_output().unwrap();
-    let term = String::from_utf8_lossy(&output.stdout);
-    let terminal = term.to_string();
-    terminal
-}
-
-
-fn get_bash() -> String {
+fn get_bash() {
    let bashver_command = Command::new("bash")
         .arg("--version")
         .stdout(Stdio::piped())
@@ -171,10 +94,11 @@ fn get_bash() -> String {
        .unwrap();
    let output = bashver_head.wait_with_output().unwrap();
    let bashv = String::from_utf8_lossy(&output.stdout);
-   bashv.to_string()
+   let bashv = bashv.to_string();
+   print!("<-> bash {}", bashv);
 }
 
-fn get_cpu() -> String {
+fn get_cpu() {
    let cpumod_command = Command::new("lscpu")
        .stdout(Stdio::piped())
        .spawn()
@@ -193,16 +117,26 @@ fn get_cpu() -> String {
        .unwrap();
    let output = cpumod_sed.wait_with_output().unwrap();
    let cpu = String::from_utf8_lossy(&output.stdout);
-   cpu.to_string()
+   let cpu = cpu.to_string();
+   print!("<-> {}", cpu);
 }
 
-fn get_kernel() -> String {
-   let output = Command::new("bash")
-       .args(["-c", "readlink", "-f", "/proc/$$/exe"])
-       .output()
-       .expect("Kernel version not found.");
-   let kernel = String::from_utf8_lossy(&output.stdout);
-   kernel.to_string()
+fn get_gpu() {
+   let gpumod_command = Command::new("inxi")
+       .arg("-Gx")
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+    let gpumod_grep = Command::new("grep")
+       .args(["-oP", r"Device-1:\K.*(?=vendor:)"])
+       .stdin(Stdio::from(gpumod_command.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+    let output = gpumod_grep.wait_with_output().unwrap();
+    let gpu = String::from_utf8_lossy(&output.stdout);
+    let gpu = gpu.to_string();
+    print!("<->{}", gpu);
 }
 
 fn get_ram() -> Vec<String> {
@@ -224,7 +158,7 @@ fn get_ram() -> Vec<String> {
     mem_array
 }
 
-fn get_ram_percentage() -> i64 {
+fn get_ram_percentage() {
    let memp_free_command = Command::new("free")
        .arg("-g")
        .stdout(Stdio::piped())
@@ -244,7 +178,8 @@ fn get_ram_percentage() -> i64 {
    let memp_used: f64 = memp_array[2].parse().unwrap();
    let ram_percentage: f64 = memp_used / memp_total * 100.0;
    let ram_percentage: i64 = ram_percentage as i64;
-   ram_percentage
+   let mem = get_ram();
+   print!("<-> {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage);
 }
 
 fn get_battery_percentage() -> i64 {
@@ -260,7 +195,6 @@ fn get_battery_percentage() -> i64 {
 }
 
 fn get_battery_status() -> () {
-    
     let battery_cat_command = Command::new("cat")
         .arg("/sys/class/power_supply/BAT0/uevent")
         .stdout(Stdio::piped())
@@ -290,15 +224,15 @@ fn get_battery_status() -> () {
     let bstatus = bstatus.trim_end();
     let bstatus = bstatus.to_string();
     match bstatus.as_str() {
-        "Charging" => print!("\x1b[32mAC \x1b[0mConnected "),
-        "Discharging" => print!("\x1b[31mAC \x1b[0mDisconnected "),
+        "Charging" => print!("<-> \x1b[36mAC Connected\x1b[0m "),
+        "Discharging" => print!("<-> \x1b[33mAC Disconnected\x1b[0m "),
         _ => print!("\x1b[33mUnknown\x1b[0mPower Connection "),
     }
 }
 
-fn modify_battery() {
+fn get_battery() {
    let battery = get_battery_percentage();
-   let battery_status = get_battery_status();
+   get_battery_status();
    if battery >= 50 {
       print!("(\x1b[32m{}%\x1b[0m)\n", battery);
    } else if battery <= 40 {
@@ -308,7 +242,7 @@ fn modify_battery() {
    }
 }
 
-fn get_system() -> (String, String) {
+fn get_system() {
    let system_family_command = Command::new("cat")
        .arg("/sys/devices/virtual/dmi/id/product_family")
        .output()
@@ -320,22 +254,29 @@ fn get_system() -> (String, String) {
         .expect("");
     let vendor_output = String::from_utf8_lossy(&system_vendor_command.stdout);
     let vendor = vendor_output.trim_end();
-    (family_output.to_string(), vendor.to_string())
+    let family = family_output.to_string(); 
+    let vendor = vendor.to_string();
+    print!("<-> {} {}", vendor, family);
 }
 
-fn get_uptime() -> String {
-   let uptime_command = Command::new("uptime")
-       .stdout(Stdio::piped())
-       .spawn()
-       .unwrap();
-    let uptime_grep_command = Command::new("grep")
-        .args(["-oP", r#"'up\K.[^,]*"#])
-        .stdin(Stdio::from(uptime_command.stdout.unwrap()))
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();
-    let output = uptime_grep_command.wait_with_output().unwrap();
-    let uptimes = String::from_utf8_lossy(&output.stdout);
-    let uptime = uptimes.trim_end();
-    uptime.to_string()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn get_colours() {
+    print!("\n\x1b[0;30m████\x1b[0;31m████\x1b[0;32m████\x1b[0;33m████\x1b[0;34m████\x1b[0;35m████\x1b[0;36m████\x1b[0;37m████\n");
+    print!("\x1b[0;30m▀▀▀▀\x1b[0;31m▀▀▀▀\x1b[0;32m▀▀▀▀\x1b[0;33m▀▀▀▀\x1b[0;34m▀▀▀▀\x1b[0;35m▀▀▀▀\x1b[0;36m▀▀▀▀\x1b[0;37m▀▀▀▀\n");
+
+
 }

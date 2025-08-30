@@ -13,7 +13,7 @@ fn main() {
 fn get_cos() -> String {
    let output = Command::new("uname")
        .output()
-       .expect("failed to get os");
+       .expect("Failed to get OS");
    let cos = String::from_utf8_lossy(&output.stdout);
    cos.to_string()
 }
