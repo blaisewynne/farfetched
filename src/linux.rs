@@ -3,10 +3,10 @@ use std::process::{Command, Stdio};
 pub fn main() {
     println!("\x1b[34m| OS |\x1b[37m");
     get_os();
-    get_user();
+    get_user_hostname();
     get_bash();
-    get_ram_percentage();
     println!("\x1b[32m| SYSTEM |\x1b[37m");
+    get_ram_percentage();
     get_storage();
     get_cpu();
     get_gpu();
@@ -43,16 +43,22 @@ fn get_os() {
     let output = os_tr_command.wait_with_output().unwrap();
     let os = String::from_utf8_lossy(&output.stdout);
     let os = os.to_string();
-    print!("<-> {}", os);
+    print!("OS: <-> {}", os);
 }
 
-fn get_user() {
-    let usr_command =  Command::new("whoami")
+fn get_user_hostname() {
+    let usr_command = Command::new("whoami")
         .output()
         .expect("Failed to get user.");
     let usr = String::from_utf8_lossy(&usr_command.stdout);
     let usr = usr.to_string();
-    print!("<-> {}", usr);
+    let hostname_command = Command::new("hostname")
+        .output()
+        .expect("");
+    let hostname = String::from_utf8_lossy(&hostname_command.stdout);
+    let hostname = hostname.to_string();
+    let hostname = hostname.trim_end();
+    print!("USR/HOST: <-> {}@{}", hostname, usr);
 }
 
 fn get_storage() {
@@ -71,7 +77,7 @@ fn get_storage() {
     let strg = String::from_utf8_lossy(&output.stdout);
     let strg = strg.to_string();
     let strg_array: Vec<String> = strg.split_whitespace().map(str::to_string).collect();
-    print!("<-> {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[3], strg_array[1], strg_array[4]);
+    print!("DISK: <-> {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[3], strg_array[1], strg_array[4]);
 }
 
 fn get_bash() {
@@ -95,7 +101,7 @@ fn get_bash() {
    let output = bashver_head.wait_with_output().unwrap();
    let bashv = String::from_utf8_lossy(&output.stdout);
    let bashv = bashv.to_string();
-   print!("<-> bash {}", bashv);
+   print!("SHELL: <-> bash {}", bashv);
 }
 
 fn get_cpu() {
@@ -118,7 +124,7 @@ fn get_cpu() {
    let output = cpumod_sed.wait_with_output().unwrap();
    let cpu = String::from_utf8_lossy(&output.stdout);
    let cpu = cpu.to_string();
-   print!("<-> {}", cpu);
+   print!("CPU: <-> {}", cpu);
 }
 
 fn get_gpu() {
@@ -136,7 +142,7 @@ fn get_gpu() {
     let output = gpumod_grep.wait_with_output().unwrap();
     let gpu = String::from_utf8_lossy(&output.stdout);
     let gpu = gpu.to_string();
-    print!("<->{}", gpu);
+    print!("GPU: <->{}", gpu);
 }
 
 fn get_ram() -> Vec<String> {
@@ -179,7 +185,7 @@ fn get_ram_percentage() {
    let ram_percentage: f64 = memp_used / memp_total * 100.0;
    let ram_percentage: i64 = ram_percentage as i64;
    let mem = get_ram();
-   print!("<-> {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage);
+   print!("MEMORY: <-> {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage);
 }
 
 fn get_battery_percentage() -> i64 {
@@ -224,9 +230,9 @@ fn get_battery_status() -> () {
     let bstatus = bstatus.trim_end();
     let bstatus = bstatus.to_string();
     match bstatus.as_str() {
-        "Charging" => print!("<-> \x1b[36mAC Connected\x1b[0m "),
-        "Discharging" => print!("<-> \x1b[33mAC Disconnected\x1b[0m "),
-        _ => print!("\x1b[33mUnknown\x1b[0mPower Connection "),
+        "Charging" => print!("BATTERY: <-> \x1b[36mAC Connected\x1b[0m "),
+        "Discharging" => print!("BATTERY: <-> \x1b[33mAC Disconnected\x1b[0m "),
+        _ => print!("BATTERY: <->\x1b[33mUnknown\x1b[0mPower Connection "),
     }
 }
 
@@ -256,7 +262,7 @@ fn get_system() {
     let vendor = vendor_output.trim_end();
     let family = family_output.to_string(); 
     let vendor = vendor.to_string();
-    print!("<-> {} {}", vendor, family);
+    print!("HOST: <-> {} {}", vendor, family);
 }
 
 
