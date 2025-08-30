@@ -12,6 +12,7 @@ pub fn main() {
     get_gpu();
     get_battery();
     get_system();
+    get_uptime();
     get_colours();
 }
 
@@ -276,9 +277,23 @@ fn get_system() {
     print!("HOST: <-> {} {}", vendor, family);
 }
 
+fn get_uptime() {
+   let uptime_cat_command = Command::new("cat")
+       .arg("/proc/uptime")
+       .output()
+       .expect("");
+   let uptime_output = String::from_utf8_lossy(&uptime_cat_command.stdout);
+   let uptime_output = uptime_output.to_string();
+   let uptime_array: Vec<String> = uptime_output.split_whitespace().map(str::to_string).collect();
+   let uptime: f64 = uptime_array[0].parse().unwrap();
+   let uptime_hours = uptime / 3600.0 % 24.0;
+   let uptime_seconds = uptime % 3600.0 / 60.0;
+   let uptime_hours: u32 = uptime_hours as u32;
+   let uptime_seconds: u32 = uptime_seconds as u32;
+   print!("UPTIME: <-> {} hours, {} mins", uptime_hours, uptime_seconds);
+}
+
 fn get_colours() {
     print!("\n\x1b[0;30m████\x1b[0;31m████\x1b[0;32m████\x1b[0;33m████\x1b[0;34m████\x1b[0;35m████\x1b[0;36m████\x1b[0;37m████\n");
-    print!("\x1b[0;30m▀▀▀▀\x1b[0;31m▀▀▀▀\x1b[0;32m▀▀▀▀\x1b[0;33m▀▀▀▀\x1b[0;34m▀▀▀▀\x1b[0;35m▀▀▀▀\x1b[0;36m▀▀▀▀\x1b[0;37m▀▀▀▀\n");
-
-
+    print!("\x1b[0;90m████\x1b[0;91m████\x1b[0;92m████\x1b[0;93m████\x1b[0;94m████\x1b[0;95m████\x1b[0;96m████\x1b[0;97m████\n");
 }
