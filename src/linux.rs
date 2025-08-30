@@ -77,7 +77,14 @@ fn get_storage() {
     let strg = String::from_utf8_lossy(&output.stdout);
     let strg = strg.to_string();
     let strg_array: Vec<String> = strg.split_whitespace().map(str::to_string).collect();
-    print!("DISK: <-> {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[3], strg_array[1], strg_array[4]);
+    let storage_percentage = strg_array[4].trim_end_matches("%");
+    let storage_percentage: i64 = storage_percentage.parse().unwrap();
+    match storage_percentage {
+        1..=65 => print!("DISK: <-> {} / {} (\x1b[32m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        66..=85 => print!("DISK: <-> {} / {} (\x1b[33m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        86..=100 => print!("DISK: <-> {} / {} (\x1b[31m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        _ => print!("DISK: <-> {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+    }
 }
 
 fn get_bash() {
@@ -185,7 +192,12 @@ fn get_ram_percentage() {
    let ram_percentage: f64 = memp_used / memp_total * 100.0;
    let ram_percentage: i64 = ram_percentage as i64;
    let mem = get_ram();
-   print!("MEMORY: <-> {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage);
+   match ram_percentage {
+     1..=30 => print!("MEMORY: <-> {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     31..=70 => print!("MEMORY: <-> {} / {} (\x1b[33m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     71..=100 => print!("MEMORY: <-> {} / {} (\x1b[31m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     _ => print!("MEMORY: <-> {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+   }
 }
 
 fn get_battery_percentage() -> i64 {
@@ -239,12 +251,11 @@ fn get_battery_status() -> () {
 fn get_battery() {
    let battery = get_battery_percentage();
    get_battery_status();
-   if battery >= 50 {
-      print!("(\x1b[32m{}%\x1b[0m)\n", battery);
-   } else if battery <= 40 {
-      print!("(\x1b[31m{}%\x1b[0m)\n", battery);
-   } else {
-      print!("(\x1b[33m{}%\x1b[0m)\n", battery);
+   match battery {
+    1..=30 => print!("(\x1b[31m{}%\x1b[0m)\n", battery),
+    50..=100 => print!("(\x1b[32m{}%\x1b[0m)\n", battery),
+    _ => print!("(\x1b[33m{}%\x1b[0m)\n", battery),
+
    }
 }
 
@@ -264,21 +275,6 @@ fn get_system() {
     let vendor = vendor.to_string();
     print!("HOST: <-> {} {}", vendor, family);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 fn get_colours() {
     print!("\n\x1b[0;30m████\x1b[0;31m████\x1b[0;32m████\x1b[0;33m████\x1b[0;34m████\x1b[0;35m████\x1b[0;36m████\x1b[0;37m████\n");
