@@ -28,8 +28,7 @@ fn get_user_hostname() {
        .expect("");
    let hostname = String::from_utf8_lossy(&hostcommand.stdout);
    let str_output = format!("\x1b[0;32m{}\x1b[0;37m@\x1b[0;32m{}\x1b[0m\n", user.trim_end(), hostname.trim_end());
-   print!("{}", str_output)
-   :w
+   print!("{}", str_output);
    for _ in 0..str_output.len() / 2 {
        print!("-")
 
