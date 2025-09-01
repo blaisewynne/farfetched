@@ -14,7 +14,7 @@ fn get_os() {
 			.output()
 			.expect("");
    let os = String::from_utf8_lossy(&uname.stdout);
-   print!("{}", os.to_string());
+   print!("\n{}", os.to_string());
 }
 
 fn get_user_hostname() {
@@ -29,7 +29,8 @@ fn get_user_hostname() {
    let hostname = String::from_utf8_lossy(&hostcommand.stdout);
    let str_output = format!("\x1b[0;32m{}\x1b[0;37m@\x1b[0;32m{}\x1b[0m\n", user.trim_end(), hostname.trim_end());
    print!("{}", str_output);
-   for _ in 0..str_output.len() / 2 {
+   let iter_output = format!("{}@{}", user.trim_end(), hostname.trim_end());
+   for _ in 0..iter_output.len() {
        print!("-")
 
    }
