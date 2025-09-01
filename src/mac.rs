@@ -3,6 +3,7 @@ use std::process::{Command, Stdio};
 pub fn main() {
   get_user_hostname();
   get_os();
+  get_kernel();
 	get_locale();
   get_ip();
 	get_colours();
@@ -32,8 +33,24 @@ fn get_user_hostname() {
    let iter_output = format!("{}@{}", user.trim_end(), hostname.trim_end());
    for _ in 0..iter_output.len() {
        print!("-")
-
    }
+}
+
+fn get_kernel() {
+   let system_command = Command::new("system_profiler")
+       .arg("SPSoftwareDataType")
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let system_sed = Command::new("sed")
+       .args(["-n", "s/^.*Kernel Version://p"])
+       .stdin(Stdio::from(system_command.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let output = system_sed.wait_with_output().unwrap();
+   let kernel = String::from_utf8_lossy(&output.stdout);
+   print!("{}", kernel.to_string().trim_start());
 }
 
 fn get_locale() {
@@ -41,15 +58,15 @@ fn get_locale() {
 	     .stdout(Stdio::piped())
 	     .spawn()
 	     .unwrap();
-   let locale_grep = Command::new("ggrep")
-	     .args(["-oP", r"LC_ALL=\K.*"])
+   let locale_sed = Command::new("sed")
+	     .args(["-n", "s/^.*LANG=//p"])
 	     .stdin(Stdio::from(locale_command.stdout.unwrap()))
 	     .stdout(Stdio::piped())
        .spawn()
 	     .unwrap();
    let locale_tr = Command::new("tr")
        .args(["-d", "\""])
-       .stdin(Stdio::from(locale_grep.stdout.unwrap()))
+       .stdin(Stdio::from(locale_sed.stdout.unwrap()))
        .stdout(Stdio::piped())
        .spawn()
        .unwrap();
@@ -57,6 +74,7 @@ fn get_locale() {
    let locale = String::from_utf8_lossy(&output.stdout);
    print!("{}", locale.to_string());
 }
+
 
 fn get_ip() {
    let ipconfig = Command::new("ipconfig")
