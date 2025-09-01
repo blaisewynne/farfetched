@@ -44,7 +44,7 @@ fn get_os() {
     let output = os_tr_command.wait_with_output().unwrap();
     let os = String::from_utf8_lossy(&output.stdout);
     let os = os.to_string();
-    print!("OS: <-> {}", os);
+    print!("OS: {}", os);
 }
 
 fn get_user_hostname() {
@@ -59,7 +59,7 @@ fn get_user_hostname() {
     let hostname = String::from_utf8_lossy(&hostname_command.stdout);
     let hostname = hostname.to_string();
     let hostname = hostname.trim_end();
-    print!("USR/HOST: <-> {}@{}", hostname, usr);
+    print!("USR/HOST: {}@{}", hostname, usr);
 }
 
 fn get_storage() {
@@ -81,10 +81,10 @@ fn get_storage() {
     let storage_percentage = strg_array[4].trim_end_matches("%");
     let storage_percentage: i64 = storage_percentage.parse().unwrap();
     match storage_percentage {
-        1..=65 => print!("DISK: <-> {} / {} (\x1b[32m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
-        66..=85 => print!("DISK: <-> {} / {} (\x1b[33m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
-        86..=100 => print!("DISK: <-> {} / {} (\x1b[31m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
-        _ => print!("DISK: <-> {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        1..=65 => print!("DISK: {} / {} (\x1b[32m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        66..=85 => print!("DISK: {} / {} (\x1b[33m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        86..=100 => print!("DISK: {} / {} (\x1b[31m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        _ => print!("DISK: {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
     }
 }
 
@@ -109,7 +109,7 @@ fn get_bash() {
    let output = bashver_head.wait_with_output().unwrap();
    let bashv = String::from_utf8_lossy(&output.stdout);
    let bashv = bashv.to_string();
-   print!("SHELL: <-> bash {}", bashv);
+   print!("SHELL: bash {}", bashv);
 }
 
 fn get_cpu() {
@@ -132,7 +132,7 @@ fn get_cpu() {
    let output = cpumod_sed.wait_with_output().unwrap();
    let cpu = String::from_utf8_lossy(&output.stdout);
    let cpu = cpu.to_string();
-   print!("CPU: <-> {}", cpu);
+   print!("CPU: {}", cpu);
 }
 
 fn get_gpu() {
@@ -150,7 +150,7 @@ fn get_gpu() {
     let output = gpumod_grep.wait_with_output().unwrap();
     let gpu = String::from_utf8_lossy(&output.stdout);
     let gpu = gpu.to_string();
-    print!("GPU: <->{}", gpu);
+    print!("GPU: {}", gpu);
 }
 
 fn get_ram() -> Vec<String> {
@@ -194,10 +194,10 @@ fn get_ram_percentage() {
    let ram_percentage: i64 = ram_percentage as i64;
    let mem = get_ram();
    match ram_percentage {
-     1..=30 => print!("MEMORY: <-> {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
-     31..=70 => print!("MEMORY: <-> {} / {} (\x1b[33m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
-     71..=100 => print!("MEMORY: <-> {} / {} (\x1b[31m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
-     _ => print!("MEMORY: <-> {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     1..=30 => print!("MEMORY: {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     31..=70 => print!("MEMORY: {} / {} (\x1b[33m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     71..=100 => print!("MEMORY: {} / {} (\x1b[31m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     _ => print!("MEMORY: {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
    }
 }
 
@@ -243,9 +243,9 @@ fn get_battery_status() -> () {
     let bstatus = bstatus.trim_end();
     let bstatus = bstatus.to_string();
     match bstatus.as_str() {
-        "Charging" => print!("BATTERY: <-> \x1b[36mAC Connected\x1b[0m "),
-        "Discharging" => print!("BATTERY: <-> \x1b[33mAC Disconnected\x1b[0m "),
-        _ => print!("BATTERY: <->\x1b[33mUnknown\x1b[0mPower Connection "),
+        "Charging" => print!("BATTERY: \x1b[36mAC Connected\x1b[0m "),
+        "Discharging" => print!("BATTERY: \x1b[33mAC Disconnected\x1b[0m "),
+        _ => print!("BATTERY: \x1b[33mUnknown\x1b[0mPower Connection "),
     }
 }
 
@@ -274,7 +274,7 @@ fn get_system() {
     let vendor = vendor_output.trim_end();
     let family = family_output.to_string(); 
     let vendor = vendor.to_string();
-    print!("HOST: <-> {} {}", vendor, family);
+    print!("HOST: {} {}", vendor, family);
 }
 
 fn get_uptime() {
@@ -290,7 +290,7 @@ fn get_uptime() {
    let uptime_seconds = uptime % 3600.0 / 60.0;
    let uptime_hours: u32 = uptime_hours as u32;
    let uptime_seconds: u32 = uptime_seconds as u32;
-   print!("UPTIME: <-> {} hours, {} mins", uptime_hours, uptime_seconds);
+   print!("UPTIME: {} hours, {} mins", uptime_hours, uptime_seconds);
 }
 
 fn get_colours() {
