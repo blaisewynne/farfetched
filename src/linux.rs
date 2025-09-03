@@ -43,8 +43,7 @@ fn get_os() {
         .unwrap();
     let output = os_tr_command.wait_with_output().unwrap();
     let os = String::from_utf8_lossy(&output.stdout);
-    let os = os.to_string();
-    print!("OS: {}", os);
+    print!("OS: {}", os.to_string());
 }
 
 fn get_user_hostname() {
@@ -108,8 +107,7 @@ fn get_bash() {
        .unwrap();
    let output = bashver_head.wait_with_output().unwrap();
    let bashv = String::from_utf8_lossy(&output.stdout);
-   let bashv = bashv.to_string();
-   print!("SHELL: bash {}", bashv);
+   print!("SHELL: <-> bash {}", bashv.to_string());
 }
 
 fn get_cpu() {
@@ -131,8 +129,7 @@ fn get_cpu() {
        .unwrap();
    let output = cpumod_sed.wait_with_output().unwrap();
    let cpu = String::from_utf8_lossy(&output.stdout);
-   let cpu = cpu.to_string();
-   print!("CPU: {}", cpu);
+   print!("CPU: <-> {}", cpu.to_string());
 }
 
 fn get_gpu() {
@@ -149,8 +146,7 @@ fn get_gpu() {
        .unwrap();
     let output = gpumod_grep.wait_with_output().unwrap();
     let gpu = String::from_utf8_lossy(&output.stdout);
-    let gpu = gpu.to_string();
-    print!("GPU: {}", gpu);
+    print!("GPU: <->{}", gpu.to_string());
 }
 
 fn get_ram() -> Vec<String> {
@@ -265,16 +261,14 @@ fn get_system() {
        .arg("/sys/devices/virtual/dmi/id/product_family")
        .output()
        .expect("");
-    let family_output = String::from_utf8_lossy(&system_family_command.stdout);
+    let family = String::from_utf8_lossy(&system_family_command.stdout);
     let system_vendor_command = Command::new("cat")
         .arg("/sys/devices/virtual/dmi/id/sys_vendor")
         .output()
         .expect("");
     let vendor_output = String::from_utf8_lossy(&system_vendor_command.stdout);
     let vendor = vendor_output.trim_end();
-    let family = family_output.to_string(); 
-    let vendor = vendor.to_string();
-    print!("HOST: {} {}", vendor, family);
+    print!("HOST: <-> {} {}", vendor.to_string(), family.to_string());
 }
 
 fn get_uptime() {
