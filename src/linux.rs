@@ -107,7 +107,7 @@ fn get_bash() {
        .unwrap();
    let output = bashver_head.wait_with_output().unwrap();
    let bashv = String::from_utf8_lossy(&output.stdout);
-   print!("SHELL: <-> bash {}", bashv.to_string());
+   print!("SHELL: bash {}", bashv.to_string());
 }
 
 fn get_cpu() {
@@ -129,7 +129,7 @@ fn get_cpu() {
        .unwrap();
    let output = cpumod_sed.wait_with_output().unwrap();
    let cpu = String::from_utf8_lossy(&output.stdout);
-   print!("CPU: <-> {}", cpu.to_string());
+   print!("CPU: {}", cpu.to_string());
 }
 
 fn get_gpu() {
@@ -146,7 +146,7 @@ fn get_gpu() {
        .unwrap();
     let output = gpumod_grep.wait_with_output().unwrap();
     let gpu = String::from_utf8_lossy(&output.stdout);
-    print!("GPU: <->{}", gpu.to_string());
+    print!("GPU: {}", gpu.to_string());
 }
 
 fn get_ram() -> Vec<String> {
@@ -268,7 +268,7 @@ fn get_system() {
         .expect("");
     let vendor_output = String::from_utf8_lossy(&system_vendor_command.stdout);
     let vendor = vendor_output.trim_end();
-    print!("HOST: <-> {} {}", vendor.to_string(), family.to_string());
+    print!("HOST: {} {}", vendor.to_string(), family.to_string());
 }
 
 fn get_uptime() {
