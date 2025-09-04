@@ -132,6 +132,7 @@ fn get_cpu() {
    let output = cpumod_sed.wait_with_output().unwrap();
    let cpu = String::from_utf8_lossy(&output.stdout);
    print!("CPU: {}", cpu.to_string());
+   print!("CPU: {}", cpu.to_string());
 }
 
 fn get_gpu() {
@@ -148,7 +149,7 @@ fn get_gpu() {
        .unwrap();
     let output = gpumod_grep.wait_with_output().unwrap();
     let gpu = String::from_utf8_lossy(&output.stdout);
-    print!("GPU: {}", gpu.to_string());
+    print!("GPU:{}", gpu.to_string());
 }
 
 fn get_ram() -> Vec<String> {
