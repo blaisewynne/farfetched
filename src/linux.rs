@@ -47,18 +47,20 @@ fn get_os() {
 }
 
 fn get_user_hostname() {
-    let usr_command = Command::new("whoami")
-        .output()
-        .expect("Failed to get user.");
-    let usr = String::from_utf8_lossy(&usr_command.stdout);
-    let usr = usr.to_string();
-    let hostname_command = Command::new("hostname")
+    let whoami = Command::new("whoami")
         .output()
         .expect("");
-    let hostname = String::from_utf8_lossy(&hostname_command.stdout);
-    let hostname = hostname.to_string();
-    let hostname = hostname.trim_end();
-    print!("USR/HOST: {}@{}", hostname, usr);
+    let user = String::from_utf8_lossy(&whoami.stdout);
+    let hostcommand = Command::new("hostname")
+        .output()
+        .expect("");
+    let hostname = String::from_utf8_lossy(&hostcommand.stdout);
+    let str_output = format!("\x1b[0;32m{}\x1b[0;37m@\x1b[0;32m{}\x1b[0m\n", user.trim_end(), hostname.trim_end());
+    print!("{}", str_output);
+    let iter_output = format!("{}@{}", user.trim_end(), hostname.trim_end());
+    for _ in 0..iter_output.len() {
+        print!("-")
+    }
 }
 
 fn get_storage() {

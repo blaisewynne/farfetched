@@ -4,6 +4,7 @@ pub fn main() {
   get_user_hostname();
   get_os();
   get_kernel();
+  get_terminal();
 	get_locale();
   get_ip();
 	get_colours();
@@ -36,6 +37,16 @@ fn get_user_hostname() {
    }
 }
 
+fn get_terminal() {
+   let terminal_command = Command::new("echo")
+       .arg("$SHELL")
+       .output()
+       .expect("");
+   let output = String::from_utf8_lossy(&terminal_command.stdout);
+   print!("{}", output.to_string());
+
+}
+
 fn get_kernel() {
    let system_command = Command::new("system_profiler")
        .arg("SPSoftwareDataType")
@@ -59,7 +70,7 @@ fn get_locale() {
 	     .spawn()
 	     .unwrap();
    let locale_sed = Command::new("sed")
-	     .args(["-n", "s/^.*LANG=//p"])
+	     .args(["-n", "s/^.*LC_MESSAGES=//p"])
 	     .stdin(Stdio::from(locale_command.stdout.unwrap()))
 	     .stdout(Stdio::piped())
        .spawn()
@@ -75,6 +86,10 @@ fn get_locale() {
    print!("{}", locale.to_string());
 }
 
+fn get_memory() {
+   
+
+}
 
 fn get_ip() {
    let ipconfig = Command::new("ipconfig")
