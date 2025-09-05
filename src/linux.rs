@@ -194,8 +194,8 @@ fn get_ram_percentage() {
    let mem = get_ram();
    match ram_percentage {
      1..=30 => print!("MEMORY: {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
-     31..=70 => print!("MEMORY: {} / {} (\x1b[33m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
-     71..=100 => print!("MEMORY: {} / {} (\x1b[31m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     31..=80 => print!("MEMORY: {} / {} (\x1b[33m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     81..=100 => print!("MEMORY: {} / {} (\x1b[31m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
      _ => print!("MEMORY: {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
    }
 }

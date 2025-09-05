@@ -103,8 +103,12 @@ fn get_swap_memory() {
    let swap_used: f64 = swap_used_str.parse().unwrap();
    let swap_percentage: f64 = swap_used / swap_total * 100.0;
    let swap_percentage: i64 = swap_percentage as i64;
-   print!("{}%\n", swap_percentage);
-
+   match swap_percentage {
+   1..=30=> print!("{:.2}GiB / {:.2}GiB (\x1b[32m{}%\x1b[0m)\n", swap_used / 1000.0, swap_total / 1000.0, swap_percentage),
+   31..=80=> print!("{:.2}GiB / {:.2}GiB (\x1b[33m{}%\x1b[0m)\n", swap_used / 1000.0, swap_total / 1000.0, swap_percentage),
+   81..=100=> print!("{:.2}GiB / {:.2}GiB (\x1b[31m{}%\x1b[0m)\n", swap_used / 1000.0, swap_total / 1000.0, swap_percentage),
+   _ => print!("{:.2}GiB / {:.2}GiB (\x1b[32m{}%\x1b[0m)\n", swap_used / 1000.0, swap_total / 1000.0, swap_percentage),
+   }
 }
 
 fn get_ip() {
