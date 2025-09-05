@@ -5,9 +5,10 @@ pub fn main() {
   get_os();
   get_kernel();
   get_terminal();
-	get_locale();
+  get_swap_memory();
+  get_locale();
   get_ip();
-	get_colours();
+  get_colours();
 }
 
 fn get_os() {
@@ -86,8 +87,23 @@ fn get_locale() {
    print!("{}", locale.to_string());
 }
 
-fn get_memory() {
-   
+fn get_swap_memory() {
+   let sysctl_command = Command::new("sysctl")
+       .arg("vm.swapusage")
+       .output()
+       .expect("");
+   let output = String::from_utf8_lossy(&sysctl_command.stdout);
+   let swap = output.to_string();
+   let swap_array: Vec<String> = swap.split_whitespace().map(str::to_string).collect();
+   let swap_total_str = swap_array[3].clone();
+   let swap_total_str = swap_total_str.replace("M", "");
+   let swap_total: f64 = swap_total_str.parse().unwrap();
+   let swap_used_str = swap_array[6].clone();
+   let swap_used_str = swap_used_str.replace("M", "");
+   let swap_used: f64 = swap_used_str.parse().unwrap();
+   let swap_percentage: f64 = swap_used / swap_total * 100.0;
+   let swap_percentage: i64 = swap_percentage as i64;
+   print!("{}%\n", swap_percentage);
 
 }
 
