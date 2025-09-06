@@ -1,12 +1,10 @@
-use std::process::{Command, Stdio};
+use std::process::{Command, Stdio, id};
 #[allow(unused)]
 pub fn main() {
-    println!("\x1b[34m| OS |\x1b[37m");
-    get_os();
     get_user_hostname();
+    get_os();
     get_bash();
     get_terminal();
-    println!("\x1b[32m| SYSTEM |\x1b[37m");
     get_ram_percentage();
     get_storage();
     get_cpu();
@@ -44,17 +42,25 @@ fn get_os() {
         .unwrap();
     let output = os_tr_command.wait_with_output().unwrap();
     let os = String::from_utf8_lossy(&output.stdout);
-    print!("OS: {}", os.to_string());
+    print!("\nOS: {}", os.to_string());
 }
 
 fn get_terminal() {
-   let terminal_cat = Command::new("ps")
-       .args(["-p", "$$", "-o", "comm="])
+   let pid = id();
+   let pid_output = format!("{}", pid);
+   let terminal_cat = Command::new("echo")
+       .arg(pid_output)
        .output()
        .expect("");
    let output = String::from_utf8_lossy(&terminal_cat.stdout);
-   let terminal = output.to_string();
-   print!("{}", terminal);
+   let pid_command = output.to_string();
+   let ps_command = Command::new("ps")
+       .args(["-o", "args=", "-p", pid_output])
+       .output()
+       .expect("");
+   let ps_output = String::from_utf8_lossy(&ps_command.stdout);
+   let ps = output.to_string();
+   print!("{}", ps);
 }
 
 fn get_user_hostname() {
@@ -142,7 +148,6 @@ fn get_cpu() {
        .unwrap();
    let output = cpumod_sed.wait_with_output().unwrap();
    let cpu = String::from_utf8_lossy(&output.stdout);
-   print!("CPU: {}", cpu.to_string());
    print!("CPU: {}", cpu.to_string());
 }
 
