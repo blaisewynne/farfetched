@@ -4,7 +4,7 @@ pub fn main() {
     get_user_hostname();
     get_os();
     get_bash();
-    get_terminal();
+    get_terminal2();
     get_ram_percentage();
     get_storage();
     get_cpu();
@@ -45,21 +45,51 @@ fn get_os() {
     print!("\nOS: {}", os.to_string());
 }
 
+fn get_terminal2() {
+   let terminal_cat = Command::new("cat")
+       .arg("/proc/thread-self/status")
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let terminal_grep = Command::new("grep")
+       .arg("PPid")
+       .stdin(Stdio::from(terminal_cat.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let terminal_awk = Command::new("awk")
+       .arg("{ print $ 2}")
+       .stdin(Stdio::from(terminal_grep.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let terminal_xargs = Command::new("xargs")
+       .args(["-iPID", "readlink", "proc/PID/exe"])
+       .stdin(Stdio::from(terminal_awk.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let output = terminal_xargs.wait_with_output().unwrap();
+   let terminal = String::from_utf8_lossy(&output.stdout);
+   print!("{}3", terminal);
+
+}
+
 fn get_terminal() {
    let pid = id();
    let pid_output = format!("{}", pid);
    let terminal_cat = Command::new("echo")
-       .arg(pid_output)
+       .arg(&pid_output)
        .output()
        .expect("");
    let output = String::from_utf8_lossy(&terminal_cat.stdout);
    let pid_command = output.to_string();
    let ps_command = Command::new("ps")
-       .args(["-o", "args=", "-p", pid_output])
+       .args(["-o", "args=", "-p", &pid_output])
        .output()
        .expect("");
    let ps_output = String::from_utf8_lossy(&ps_command.stdout);
-   let ps = output.to_string();
+   let ps = ps_output.to_string();
    print!("{}", ps);
 }
 
@@ -253,6 +283,7 @@ fn get_battery_status() -> () {
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
+
     let output = battery_tr_command.wait_with_output().unwrap();
     let bstatus = String::from_utf8_lossy(&output.stdout);
     let bstatus = bstatus.trim_end();
