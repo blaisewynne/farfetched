@@ -12,6 +12,7 @@ pub fn main() {
     get_battery();
     get_system();
     get_uptime();
+    get_locale();
     get_colours();
 }
 
@@ -335,6 +336,29 @@ fn get_uptime() {
    let uptime_hours: u32 = uptime_hours as u32;
    let uptime_seconds: u32 = uptime_seconds as u32;
    print!("UPTIME: {} hours, {} mins", uptime_hours, uptime_seconds);
+}
+
+fn get_locale() {
+   let locale = Command::new("locale")
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let locale_sed = Command::new("sed")
+       .args(["-n", "s/^.*LC_MESSAGES=//p"])
+       .stdin(Stdio::from(locale.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let locale_tr = Command::new("tr")
+       .args(["-d", "\""])
+       .stdin(Stdio::from(locale_sed.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+  let output = locale_tr.wait_with_output().unwrap();
+  let locale = String::from_utf8_lossy(&output.stdout);
+  print!("\nLOCALE: {}", locale.to_string());
+
 }
 
 fn get_colours() {
