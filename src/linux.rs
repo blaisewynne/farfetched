@@ -1,4 +1,5 @@
-use std::process::{Command, Stdio, id};
+use std::process::{Command, Stdio};
+use std::process;
 #[allow(unused)]
 pub fn main() {
     get_user_hostname();
@@ -72,26 +73,8 @@ fn get_terminal2() {
        .unwrap();
    let output = terminal_xargs.wait_with_output().unwrap();
    let terminal = String::from_utf8_lossy(&output.stdout);
-   print!("{}3", terminal);
+   print!("{}", terminal);
 
-}
-
-fn get_terminal() {
-   let pid = id();
-   let pid_output = format!("{}", pid);
-   let terminal_cat = Command::new("echo")
-       .arg(&pid_output)
-       .output()
-       .expect("");
-   let output = String::from_utf8_lossy(&terminal_cat.stdout);
-   let pid_command = output.to_string();
-   let ps_command = Command::new("ps")
-       .args(["-o", "args=", "-p", &pid_output])
-       .output()
-       .expect("");
-   let ps_output = String::from_utf8_lossy(&ps_command.stdout);
-   let ps = ps_output.to_string();
-   print!("{}", ps);
 }
 
 fn get_user_hostname() {
@@ -130,34 +113,26 @@ fn get_storage() {
     let storage_percentage = strg_array[4].trim_end_matches("%");
     let storage_percentage: i64 = storage_percentage.parse().unwrap();
     match storage_percentage {
-        1..=65 => print!("DISK: {} / {} (\x1b[32m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
-        66..=85 => print!("DISK: {} / {} (\x1b[33m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
-        86..=100 => print!("DISK: {} / {} (\x1b[31m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        1..=65 => print!("DISK: {}i / {}i (\x1b[32m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        66..=85 => print!("DISK: {}i / {}i (\x1b[33m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        86..=100 => print!("DISK: {}i / {}i (\x1b[31m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
         _ => print!("DISK: {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
     }
 }
 
 fn get_bash() {
-   let bashver_command = Command::new("bash")
-        .arg("--version")
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();
-   let bashver_grep = Command::new("grep")
-        .args(["-oP", "version[^(]*"])
-        .stdin(Stdio::from(bashver_command.stdout.unwrap()))
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap();
-   let bashver_head = Command::new("head")
-       .arg("-1")
-       .stdin(Stdio::from(bashver_grep.stdout.unwrap()))
-       .stdout(Stdio::piped())
-       .spawn()
-       .unwrap();
-   let output = bashver_head.wait_with_output().unwrap();
-   let bashv = String::from_utf8_lossy(&output.stdout);
-   print!("SHELL: bash {}", bashv.to_string());
+    let pid = process::id();
+    let ps_command = Command::new("ps")
+        .arg("-o")
+        .arg(format!("ppid={}", pid))
+        .output();
+    let output = ps_command.unwrap();
+    let bashv = String::from_utf8_lossy(&output.stdout).to_string();
+    let test: Vec<i32> = bashv.split_whitespace().map(|s| s.parse().expect("")).collect();
+    for pid in &test {
+        print!("{}", pid);
+    }
+    print!("{:?}", test);
 }
 
 fn get_cpu() {
@@ -358,7 +333,6 @@ fn get_locale() {
   let output = locale_tr.wait_with_output().unwrap();
   let locale = String::from_utf8_lossy(&output.stdout);
   print!("\nLOCALE: {}", locale.to_string());
-
 }
 
 fn get_colours() {
