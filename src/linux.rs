@@ -247,7 +247,7 @@ fn get_ram_percentage() {
 }
 
 fn get_battery_percentage() -> i64 {
-   let battery_cat_command = Command::new("cat")
+    let battery_cat_command = Command::new("cat")
    .arg("/sys/class/power_supply/BAT0/capacity")
    .output()
    .expect("");
@@ -289,7 +289,7 @@ fn get_battery_status() -> () {
     let bstatus = bstatus.trim_end();
     let bstatus = bstatus.to_string();
     match bstatus.as_str() {
-        "Charging" => print!("BATTERY: \x1b[36mAC Connected\x1b[0m "),
+        "Charging" => print!("BATTERY: \x1b[36m⚡︎ AC Connected ⚡︎\x1b[0m "),
         "Discharging" => print!("BATTERY: \x1b[33mAC Disconnected\x1b[0m "),
         _ => print!("BATTERY: \x1b[33mUnknown\x1b[0mPower Connection "),
     }
