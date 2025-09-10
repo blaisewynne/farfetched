@@ -1,10 +1,8 @@
 use std::process::{Command, Stdio};
-use std::process;
 pub fn main() {
     get_user_hostname();
     get_os();
-    get_bash();
-    get_terminal2();
+    get_test();
     get_ram_percentage();
     get_storage();
     get_cpu();
@@ -119,30 +117,66 @@ fn get_storage() {
     }
 }
 
+fn get_test() {
+  let bash_command = Command::new("pgrep")
+      .arg("bash")
+      .output()
+      .expect("");
+   let output = String::from_utf8_lossy(&bash_command.stdout);
+   let _bash = output.to_string();
+   if bash_command.stdout.is_empty() {
+    get_zsh();
+   } else {
+     get_bash()
+   }
+}
+
+fn get_zsh() {
+   let zshver_command = Command::new("zsh")
+        .arg("--version")
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+   let zshver_grep = Command::new("grep")
+        .args(["-o", "^[^(]*"])
+        .stdin(Stdio::from(zshver_command.stdout.unwrap()))
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+   let zshver_head = Command::new("head")
+       .arg("-1")
+       .stdin(Stdio::from(zshver_grep.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let output = zshver_head.wait_with_output().unwrap();
+   let zshv = String::from_utf8_lossy(&output.stdout);
+   print!("SHELL: {}", zshv.to_string());
+}
+
+
+
 fn get_bash() {
-    let pid = process::id();
-    let ps_command = Command::new("ps")
-        .arg("-o")
-        .arg(format!("ppid={}", pid))
-        .output();
-    let output = ps_command.unwrap();
-    let bashv = String::from_utf8_lossy(&output.stdout).to_string();
-    let test: Vec<i32> = bashv.split_whitespace().map(|s| s.parse().expect("")).collect();
-    print!("{}", test[0]);
-    let ps_command2 = Command::new("ps")
-        .arg("-ef")
+   let bashver_command = Command::new("bash")
+        .arg("--version")
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
-    let grep_command = Command::new("grep")
-        .arg(format!("{}", pid))
-        .stdin(Stdio::from(ps_command2.stdout.unwrap()))
+   let bashver_grep = Command::new("grep")
+        .args(["-oP", "version[^(]*"])
+        .stdin(Stdio::from(bashver_command.stdout.unwrap()))
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
-    let output2 = grep_command.wait_with_output().unwrap();
-    let terminal2 = String::from_utf8_lossy(&output2.stdout).to_string();
-    print!("{}", terminal2.to_string())
+   let bashver_head = Command::new("head")
+       .arg("-1")
+       .stdin(Stdio::from(bashver_grep.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let output = bashver_head.wait_with_output().unwrap();
+   let bashv = String::from_utf8_lossy(&output.stdout);
+   print!("SHELL: bash {}", bashv.to_string());
 }
 
 fn get_cpu() {
