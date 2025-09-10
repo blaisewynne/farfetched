@@ -1,6 +1,5 @@
 use std::process::{Command, Stdio};
 use std::process;
-#[allow(unused)]
 pub fn main() {
     get_user_hostname();
     get_os();
@@ -129,10 +128,14 @@ fn get_bash() {
     let output = ps_command.unwrap();
     let bashv = String::from_utf8_lossy(&output.stdout).to_string();
     let test: Vec<i32> = bashv.split_whitespace().map(|s| s.parse().expect("")).collect();
-    for pid in &test {
-        print!("{}", pid);
-    }
-    print!("{:?}", test);
+    print!("{}", test[1]);
+    let ps_command2 = Command::new("ps")
+        .arg("-p")
+        .arg(format!("{}", test[1]))
+        .args(["o", "comm="])
+        .output();
+    let output2 = ps_command2.unwrap();
+    let terminal2 = String::from_utf8_lossy(&output.stdout).to_string();
 }
 
 fn get_cpu() {
