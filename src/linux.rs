@@ -128,14 +128,21 @@ fn get_bash() {
     let output = ps_command.unwrap();
     let bashv = String::from_utf8_lossy(&output.stdout).to_string();
     let test: Vec<i32> = bashv.split_whitespace().map(|s| s.parse().expect("")).collect();
-    print!("{}", test[1]);
+    print!("{}", test[0]);
     let ps_command2 = Command::new("ps")
-        .arg("-p")
-        .arg(format!("{}", test[1]))
-        .args(["o", "comm="])
-        .output();
-    let output2 = ps_command2.unwrap();
-    let terminal2 = String::from_utf8_lossy(&output.stdout).to_string();
+        .arg("-ef")
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let grep_command = Command::new("grep")
+        .arg(format!("{}", pid))
+        .stdin(Stdio::from(ps_command2.stdout.unwrap()))
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let output2 = grep_command.wait_with_output().unwrap();
+    let terminal2 = String::from_utf8_lossy(&output2.stdout).to_string();
+    print!("{}", terminal2.to_string())
 }
 
 fn get_cpu() {
