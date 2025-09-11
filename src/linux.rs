@@ -2,7 +2,7 @@ use std::process::{Command, Stdio};
 pub fn main() {
     get_user_hostname();
     get_os();
-    get_test();
+    get_terminal();
     get_ram_percentage();
     get_storage();
     get_cpu();
