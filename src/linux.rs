@@ -44,36 +44,6 @@ fn get_os() {
     print!("\nOS: {}", os.to_string());
 }
 
-fn get_terminal2() {
-   let terminal_cat = Command::new("cat")
-       .arg("/proc/thread-self/status")
-       .stdout(Stdio::piped())
-       .spawn()
-       .unwrap();
-   let terminal_grep = Command::new("grep")
-       .arg("PPid")
-       .stdin(Stdio::from(terminal_cat.stdout.unwrap()))
-       .stdout(Stdio::piped())
-       .spawn()
-       .unwrap();
-   let terminal_awk = Command::new("awk")
-       .arg("{ print $ 2}")
-       .stdin(Stdio::from(terminal_grep.stdout.unwrap()))
-       .stdout(Stdio::piped())
-       .spawn()
-       .unwrap();
-   let terminal_xargs = Command::new("xargs")
-       .args(["-iPID", "readlink", "proc/PID/exe"])
-       .stdin(Stdio::from(terminal_awk.stdout.unwrap()))
-       .stdout(Stdio::piped())
-       .spawn()
-       .unwrap();
-   let output = terminal_xargs.wait_with_output().unwrap();
-   let terminal = String::from_utf8_lossy(&output.stdout);
-   print!("{}", terminal);
-
-}
-
 fn get_user_hostname() {
     let whoami = Command::new("whoami")
         .output()
@@ -117,7 +87,7 @@ fn get_storage() {
     }
 }
 
-fn get_test() {
+fn get_terminal() {
   let bash_command = Command::new("pgrep")
       .arg("bash")
       .output()
