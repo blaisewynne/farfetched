@@ -1,8 +1,11 @@
 use std::process::{Command, Stdio};
+use std::process;
 pub fn main() {
+    print!("\n");
     get_user_hostname();
     get_os();
-    get_terminal();
+    //get_terminal();
+    get_shell();
     get_ram_percentage();
     get_storage();
     get_cpu();
@@ -80,14 +83,14 @@ fn get_storage() {
     let storage_percentage = strg_array[4].trim_end_matches("%");
     let storage_percentage: i64 = storage_percentage.parse().unwrap();
     match storage_percentage {
-        1..=65 => print!("DISK: {}i / {}i (\x1b[32m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
-        66..=85 => print!("DISK: {}i / {}i (\x1b[33m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
-        86..=100 => print!("DISK: {}i / {}i (\x1b[31m{}%\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
-        _ => print!("DISK: {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[3], strg_array[1], storage_percentage),
+        1..=65 => print!("DISK: {}i / {}i (\x1b[32m{}%\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
+        66..=85 => print!("DISK: {}i / {}i (\x1b[33m{}%\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
+        86..=100 => print!("DISK: {}i / {}i (\x1b[31m{}%\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
+        _ => print!("DISK: {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
     }
 }
 
-fn get_terminal() {
+fn get_shell() {
   let bash_command = Command::new("pgrep")
       .arg("bash")
       .output()
@@ -124,8 +127,6 @@ fn get_zsh() {
    print!("SHELL: {}", zshv.to_string());
 }
 
-
-
 fn get_bash() {
    let bashver_command = Command::new("bash")
         .arg("--version")
@@ -147,6 +148,16 @@ fn get_bash() {
    let output = bashver_head.wait_with_output().unwrap();
    let bashv = String::from_utf8_lossy(&output.stdout);
    print!("SHELL: bash {}", bashv.to_string());
+}
+
+fn get_terminal() {
+   let pid = process::id();
+   let term_command = Command::new("cat")
+       .arg(format!("/proc/{}/status", pid))
+       .output()
+       .expect("");
+   let terminal = String::from_utf8_lossy(&term_command.stdout);
+   print!("{}", terminal.to_string());
 }
 
 fn get_cpu() {
@@ -279,9 +290,11 @@ fn get_battery_status() -> () {
     let bstatus = bstatus.trim_end();
     let bstatus = bstatus.to_string();
     match bstatus.as_str() {
-        "Charging" => print!("BATTERY: \x1b[36m⚡︎ AC Connected ⚡︎\x1b[0m "),
+        "Charging" => print!("BATTERY: \x1b[36m⚡︎AC Connected ⚡︎\x1b[0m"),
         "Discharging" => print!("BATTERY: \x1b[33mAC Disconnected\x1b[0m "),
-        _ => print!("BATTERY: \x1b[33mUnknown\x1b[0mPower Connection "),
+        "Full" => print!("BATTERY: \x1b[32mFully Charged\x1b[0m"),
+        "Not charging" => print!("BATTERY: \x1b[31mNot Charging\x1b[0m"),
+        _ => print!("BATTERY: \x1b[33mUnknown \x1b[0mPower Connection"),
     }
 }
 
