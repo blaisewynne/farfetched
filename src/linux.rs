@@ -1,10 +1,12 @@
 use std::process::{Command, Stdio};
 use std::process;
+use std::env;
 pub fn main() {
     print!("\n");
     get_user_hostname();
     get_os();
     get_kernel();
+    get_desktop();
     get_shell();
     get_ram_percentage();
     get_storage();
@@ -54,7 +56,16 @@ fn get_kernel() {
        .expect("");
    let kernel = String::from_utf8_lossy(&kernel_command.stdout);
    print!("KERNEL: {}", kernel.to_string());
+}
 
+fn get_desktop() {
+   let desktop_environment = "XDG_CURRENT_DESKTOP";
+
+   match env::var(desktop_environment).expect("").as_str() {
+      "Hyprland" => print!("DESKTOP: Hyprland\n"),
+      "KDE" => print!("DESKTOP: KDE Plasma\n"),
+      _ => print!("Unknown Desktop")
+   }
 }
 
 fn get_user_hostname() {
