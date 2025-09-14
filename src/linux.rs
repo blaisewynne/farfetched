@@ -1,13 +1,12 @@
 use std::process::{Command, Stdio};
 use std::process;
-use std::env;
+mod desktop;
 pub fn main() {
-    print!("\n");
     get_user_hostname();
     get_os();
     get_kernel();
-    get_desktop();
     get_shell();
+    desktop::desktops::get_desktop();
     get_ram_percentage();
     get_storage();
     get_cpu();
@@ -56,34 +55,6 @@ fn get_kernel() {
        .expect("");
    let kernel = String::from_utf8_lossy(&kernel_command.stdout);
    print!("KERNEL: {}", kernel.to_string());
-}
-
-fn get_desktop() {
-   let desktop_environment = "XDG_CURRENT_DESKTOP";
-
-   match env::var(desktop_environment).expect("").as_str() {
-      "Hyprland" => get_hyprland(),
-      "KDE" => print!("DESKTOP: KDE Plasma\n"),
-      _ => print!("Unknown Desktop")
-   }
-}
-
-fn get_hyprland() {
-   let hyprland_command = Command::new("hyprctl")
-       .arg("version")
-       .stdout(Stdio::piped())
-       .spawn()
-       .unwrap();
-   let hyprland_sed = Command::new("sed")
-       .args(["-n", r"s/.*Tag:\(.*\),.*/\1/p"])
-       .stdin(Stdio::from(hyprland_command.stdout.unwrap()))
-       .stdout(Stdio::piped())
-       .spawn()
-       .unwrap();
-   let hyprland_output = hyprland_sed.wait_with_output().unwrap();
-   let hyprland = String::from_utf8_lossy(&hyprland_output.stdout);
-   print!("DESKTOP: Hyprland {}\n", hyprland.to_string().trim());
-
 }
 
 fn get_user_hostname() {
@@ -329,7 +300,7 @@ fn get_battery_status() -> () {
     let bstatus = bstatus.trim_end();
     let bstatus = bstatus.to_string();
     match bstatus.as_str() {
-        "Charging" => print!("BATTERY: \x1b[36m⚡︎AC Connected ⚡︎\x1b[0m"),
+        "Charging" => print!("BATTERY: \x1b[36m ⚡︎ AC Connected ⚡︎ \x1b[0m"),
         "Discharging" => print!("BATTERY: \x1b[33mAC Disconnected\x1b[0m "),
         "Full" => print!("BATTERY: \x1b[32mFully Charged\x1b[0m"),
         "Not charging" => print!("BATTERY: \x1b[31mNot Charging\x1b[0m"),
