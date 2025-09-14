@@ -4,7 +4,7 @@ pub fn main() {
     print!("\n");
     get_user_hostname();
     get_os();
-    //get_terminal();
+    get_kernel();
     get_shell();
     get_ram_percentage();
     get_storage();
@@ -45,6 +45,16 @@ fn get_os() {
     let output = os_tr_command.wait_with_output().unwrap();
     let os = String::from_utf8_lossy(&output.stdout);
     print!("\nOS: {}", os.to_string());
+}
+
+fn get_kernel() {
+   let kernel_command = Command::new("uname")
+       .arg("-r")
+       .output()
+       .expect("");
+   let kernel = String::from_utf8_lossy(&kernel_command.stdout);
+   print!("KERNEL: {}", kernel.to_string());
+
 }
 
 fn get_user_hostname() {
