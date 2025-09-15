@@ -54,7 +54,7 @@ fn get_kernel() {
        .output()
        .expect("");
    let kernel = String::from_utf8_lossy(&kernel_command.stdout);
-   print!("KERNEL: {}", kernel.to_string());
+   print!("Kernel: {}", kernel.to_string());
 }
 
 fn get_user_hostname() {
@@ -93,10 +93,10 @@ fn get_storage() {
     let storage_percentage = strg_array[4].trim_end_matches("%");
     let storage_percentage: i64 = storage_percentage.parse().unwrap();
     match storage_percentage {
-        1..=65 => print!("DISK: {}i / {}i (\x1b[32m{}%\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
-        66..=85 => print!("DISK: {}i / {}i (\x1b[33m{}%\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
-        86..=100 => print!("DISK: {}i / {}i (\x1b[31m{}%\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
-        _ => print!("DISK: {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
+        1..=65 => print!("Disk: {}i / {}i (\x1b[32m{}%\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
+        66..=85 => print!("Disk: {}i / {}i (\x1b[33m{}%\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
+        86..=100 => print!("Disk: {}i / {}i (\x1b[31m{}%\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
+        _ => print!("Disk: {} / {} (\x1b[32m{}\x1b[0m)\n", strg_array[2], strg_array[1], storage_percentage),
     }
 }
 
@@ -134,7 +134,7 @@ fn get_zsh() {
        .unwrap();
    let output = zshver_head.wait_with_output().unwrap();
    let zshv = String::from_utf8_lossy(&output.stdout);
-   print!("SHELL: {}", zshv.to_string());
+   print!("Shell: {}", zshv.to_string());
 }
 
 fn get_bash() {
@@ -157,7 +157,7 @@ fn get_bash() {
        .unwrap();
    let output = bashver_head.wait_with_output().unwrap();
    let bashv = String::from_utf8_lossy(&output.stdout);
-   print!("SHELL: bash {}", bashv.to_string());
+   print!("Shell: bash {}", bashv.to_string());
 }
 
 fn get_terminal() {
@@ -250,10 +250,10 @@ fn get_ram_percentage() {
    let ram_percentage: i64 = ram_percentage as i64;
    let mem = get_ram();
    match ram_percentage {
-     1..=30 => print!("MEMORY: {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
-     31..=80 => print!("MEMORY: {} / {} (\x1b[33m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
-     81..=100 => print!("MEMORY: {} / {} (\x1b[31m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
-     _ => print!("MEMORY: {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     1..=30 => print!("Memory: {} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     31..=80 => print!("Memory: {} / {} (\x1b[33m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     81..=100 => print!("Memory: {} / {} (\x1b[31m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
+     _ => print!("\x1b[33mMemory: \x1b[0m){} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
    }
 }
 
@@ -300,11 +300,11 @@ fn get_battery_status() -> () {
     let bstatus = bstatus.trim_end();
     let bstatus = bstatus.to_string();
     match bstatus.as_str() {
-        "Charging" => print!("BATTERY: \x1b[36m ⚡︎ AC Connected ⚡︎ \x1b[0m"),
-        "Discharging" => print!("BATTERY: \x1b[33mAC Disconnected\x1b[0m "),
-        "Full" => print!("BATTERY: \x1b[32mFully Charged\x1b[0m"),
-        "Not charging" => print!("BATTERY: \x1b[31mNot Charging\x1b[0m"),
-        _ => print!("BATTERY: \x1b[33mUnknown \x1b[0mPower Connection"),
+        "Charging" => print!("Battery: \x1b[36m ⚡︎ AC Connected ⚡︎ \x1b[0m"),
+        "Discharging" => print!("Battery: \x1b[33mAC Disconnected\x1b[0m "),
+        "Full" => print!("Battery: \x1b[32mFully Charged\x1b[0m"),
+        "Not charging" => print!("Battery: \x1b[31mNot Charging\x1b[0m"),
+        _ => print!("Battery: \x1b[33mUnknown \x1b[0mPower Connection"),
     }
 }
 
@@ -331,7 +331,7 @@ fn get_system() {
         .expect("");
     let vendor_output = String::from_utf8_lossy(&system_vendor_command.stdout);
     let vendor = vendor_output.trim_end();
-    print!("HOST: {} {}", vendor.to_string(), family.to_string());
+    print!("Host: {} {}", vendor.to_string(), family.to_string());
 }
 
 fn get_uptime() {
@@ -339,15 +339,21 @@ fn get_uptime() {
        .arg("/proc/uptime")
        .output()
        .expect("");
-   let uptime_output = String::from_utf8_lossy(&uptime_cat_command.stdout);
+   let mut uptime_output = String::from_utf8_lossy(&uptime_cat_command.stdout);
    let uptime_output = uptime_output.to_string();
    let uptime_array: Vec<String> = uptime_output.split_whitespace().map(str::to_string).collect();
-   let uptime: f64 = uptime_array[0].parse().unwrap();
-   let uptime_hours = uptime / 3600.0 % 24.0;
-   let uptime_seconds = uptime % 3600.0 / 60.0;
-   let uptime_hours: u32 = uptime_hours as u32;
-   let uptime_seconds: u32 = uptime_seconds as u32;
-   print!("UPTIME: {} hours, {} mins", uptime_hours, uptime_seconds);
+   let mut uptime: f64 = uptime_array[0].parse().unwrap();
+   let uptime: u32 = uptime as u32;
+   if uptime >= 86400 {
+      let uptime_days = uptime / 86400;
+      let uptime_hours = uptime / 3600 % 24;
+      let uptime_seconds = uptime % 3600 / 60;
+      print!("Uptime: {} days, {} hours, {} mins", uptime_days, uptime_hours, uptime_seconds);
+   } else {
+      let uptime_hours = uptime / 3600 % 24;
+      let uptime_seconds = uptime % 3600 / 60;
+      print!("Uptime: {} hours, {} mins", uptime_hours, uptime_seconds);
+   }
 }
 
 fn get_locale() {
@@ -369,7 +375,7 @@ fn get_locale() {
        .unwrap();
   let output = locale_tr.wait_with_output().unwrap();
   let locale = String::from_utf8_lossy(&output.stdout);
-  print!("\nLOCALE: {}", locale.to_string());
+  print!("\nLocale: {}", locale.to_string());
 }
 
 fn get_colours() {

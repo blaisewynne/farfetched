@@ -7,7 +7,7 @@ pub fn get_desktop() {
 
    match env::var(desktop_environment).expect("").as_str() {
       "Hyprland" => get_hyprland(),
-      "KDE" => print!("DESKTOP: KDE Plasma\n"),
+      "KDE" => print!("Desktop: KDE Plasma\n"),
       "GNOME" => print!("DESKTOP"),
       _ => print!("Unknown Desktop\n")
    }
@@ -25,8 +25,25 @@ fn get_hyprland() {
        .stdout(Stdio::piped())
        .spawn()
        .unwrap();
-   let hyprland_output = hyprland_sed.wait_with_output().unwrap();
-   let hyprland = String::from_utf8_lossy(&hyprland_output.stdout);
-   print!("DESKTOP: Hyprland {}\n", hyprland.to_string().trim());
+   let output = hyprland_sed.wait_with_output().unwrap();
+   let hyprland = String::from_utf8_lossy(&output.stdout);
+   print!("Desktop: Hyprland {}\n", hyprland.to_string().trim());
+}
 
+fn get_gnome() {
+   let gnome_command = Command::new("gnome-shell")
+       .arg("--version")
+       .output()
+       .expect("");
+   let gnome = String::from_utf8_lossy(&gnome_command.stdout);
+   print!("Desktop: {}", gnome.to_string());
+}
+
+fn get_cinnamon() {
+   let cinnamon_command = Command::new("cinnamon-shell")
+       .arg("--version")
+       .output()
+       .expect("");
+   let cinnamon = String::from_utf8_lossy(&cinnamon_command.stdout);
+   print!("Desktop: {}", cinnamon.to_string());
 }
