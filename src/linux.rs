@@ -339,10 +339,10 @@ fn get_uptime() {
        .arg("/proc/uptime")
        .output()
        .expect("");
-   let mut uptime_output = String::from_utf8_lossy(&uptime_cat_command.stdout);
+   let uptime_output = String::from_utf8_lossy(&uptime_cat_command.stdout);
    let uptime_output = uptime_output.to_string();
    let uptime_array: Vec<String> = uptime_output.split_whitespace().map(str::to_string).collect();
-   let mut uptime: f64 = uptime_array[0].parse().unwrap();
+   let uptime: f64 = uptime_array[0].parse().unwrap();
    let uptime: u32 = uptime as u32;
    if uptime >= 86400 {
       let uptime_days = uptime / 86400;

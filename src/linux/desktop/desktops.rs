@@ -7,8 +7,8 @@ pub fn get_desktop() {
 
    match env::var(desktop_environment).expect("").as_str() {
       "Hyprland" => get_hyprland(),
-      "KDE" => print!("Desktop: KDE Plasma\n"),
-      "GNOME" => print!("DESKTOP"),
+      "Cinnamon" => get_cinnamon(),
+      "GNOME" => get_gnome(),
       _ => print!("Unknown Desktop\n")
    }
 }
