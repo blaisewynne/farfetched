@@ -27,3 +27,15 @@ fn get_kitty() {
    let kitty = String::from_utf8_lossy(&kitty_output.stdout);
    print!("Terminal: {}", kitty.to_string());
 }
+
+fn get_alacritty() {
+   let alacritty_version = Command::new("alacritty")
+       .arg("--version")
+       .output()
+       .expect("");
+   let alacritty = String::from_utf8_lossy(&alacritty_version.stdout);
+   print!("Terminal: {}", alacritty.to_string());
+
+
+
+}
