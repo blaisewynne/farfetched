@@ -27,7 +27,7 @@ fn get_hyprland() {
        .unwrap();
    let output = hyprland_sed.wait_with_output().unwrap();
    let hyprland = String::from_utf8_lossy(&output.stdout);
-   print!("Desktop: Hyprland {}\n", hyprland.to_string().trim());
+   print!("DE: Hyprland {}\n", hyprland.to_string().trim());
 }
 
 fn get_gnome() {
@@ -36,7 +36,7 @@ fn get_gnome() {
        .output()
        .expect("");
    let gnome = String::from_utf8_lossy(&gnome_command.stdout);
-   print!("Desktop: {}", gnome.to_string());
+   print!("DE: {}", gnome.to_string());
 }
 
 fn get_cinnamon() {
@@ -45,5 +45,5 @@ fn get_cinnamon() {
        .output()
        .expect("");
    let cinnamon = String::from_utf8_lossy(&cinnamon_command.stdout);
-   print!("Desktop: {}", cinnamon.to_string());
+   print!("DE: {}", cinnamon.to_string());
 }
