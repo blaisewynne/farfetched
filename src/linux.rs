@@ -1,12 +1,14 @@
 use std::process::{Command, Stdio};
 use std::process;
 mod desktop;
+mod terminal;
 pub fn main() {
     get_user_hostname();
     get_os();
     get_kernel();
     get_shell();
     desktop::desktops::get_desktop();
+    terminal::terminal::get_terminal();
     get_ram_percentage();
     get_storage();
     get_cpu();
@@ -158,16 +160,6 @@ fn get_bash() {
    let output = bashver_head.wait_with_output().unwrap();
    let bashv = String::from_utf8_lossy(&output.stdout);
    print!("Shell: bash {}", bashv.to_string());
-}
-
-fn get_terminal() {
-   let pid = process::id();
-   let term_command = Command::new("cat")
-       .arg(format!("/proc/{}/status", pid))
-       .output()
-       .expect("");
-   let terminal = String::from_utf8_lossy(&term_command.stdout);
-   print!("{}", terminal.to_string());
 }
 
 fn get_cpu() {
