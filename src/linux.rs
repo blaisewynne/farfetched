@@ -14,7 +14,7 @@ pub fn main() {
     get_storage();
     get_cpu();
     get_gpu();
-    battery::battery::get_battery();
+    battery_check();
     get_system();
     get_uptime();
     get_locale();
@@ -249,6 +249,20 @@ fn get_ram_percentage() {
      81..=100 => print!("Memory: {} / {} (\x1b[31m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
      _ => print!("\x1b[33mMemory: \x1b[0m){} / {} (\x1b[32m{}%\x1b[0m)\n", mem[2], mem[1], ram_percentage),
    }
+}
+
+fn battery_check() {
+    let battery_check = Command::new("cat")
+    .arg("/sys/class/power_supply/BAT0/capacity")
+    .output();
+
+    if battery_check.unwrap().status.success() {
+        battery::battery::get_battery();
+    } else {
+        print!("");
+    }
+    
+   
 }
 
 fn get_system() {
