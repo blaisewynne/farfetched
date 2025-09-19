@@ -255,14 +255,9 @@ fn battery_check() {
     let battery_check = Command::new("cat")
     .arg("/sys/class/power_supply/BAT0/capacity")
     .output();
-
     if battery_check.unwrap().status.success() {
         battery::battery::get_battery();
-    } else {
-        print!("");
     }
-    
-   
 }
 
 fn get_system() {
