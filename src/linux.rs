@@ -17,6 +17,7 @@ pub fn main() {
     get_system();
     get_uptime();
     get_locale();
+    get_ip();
     get_colours();
 }
 
@@ -368,6 +369,23 @@ fn get_locale() {
   let output = locale_tr.wait_with_output().unwrap();
   let locale = String::from_utf8_lossy(&output.stdout);
   print!("\nLocale: {}", locale.to_string());
+}
+
+fn get_ip() {
+   let ip_command = Command::new("ip")
+       .args(["addr", "show", "wlp61s0"])
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let ip_grep = Command::new("grep")
+       .args(["-oP", r"inet\K.*(?= brd )"])
+       .stdin(Stdio::from(ip_command.stdout.unwrap()))
+       .stdout(Stdio::piped())
+       .spawn()
+       .unwrap();
+   let ip_output = ip_grep.wait_with_output().unwrap();
+   let ip = String::from_utf8_lossy(&ip_output.stdout);
+   print!("IP:{}", ip.to_string().trim_end());
 }
 
 fn get_colours() {
